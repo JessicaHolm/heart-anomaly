@@ -23,7 +23,6 @@ class Heart(object):
                     num = int(col)
                     T[i][j] = num
         self.T = T
-        self.n = n
 
     def create_test(self, test_file):
         with open(test_file, "r") as f:
@@ -62,7 +61,7 @@ class Heart(object):
                         s = N[i] - s
                     self.L[i][j] += math.log10(s + 0.5) - math.log10(N[i] + 0.5)
 
-   def classify(self):
+    def classify(self):
         list1 = self.L[0]
         list2 = self.L[1]
         R = []
@@ -73,13 +72,28 @@ class Heart(object):
                 R.append(0)
         self.R = R
 
-    def verify(self):
+    def verify(self, kind):
         correct = 0
+        true_negative = 0
+        true_positive = 0
+        total_negative = 0
+        total_positive = 0
         for c,r in zip(self.C, self.R):
             if c[0] == r:
+                if c[0] == 0:
+                    true_negative += 1
+                if c[0] == 1:
+                    true_positive += 1
                 correct += 1
+            if c[0] == 0:
+                total_negative += 1
+            if c[0] == 1:
+                total_positive += 1
 
-        print("orig {}/{} ({})".format(correct, self.n, correct/self.n))
+        print("{} {}/{} ({}) {}/{} ({}) {}/{} ({})"
+        .format(kind, correct, self.n, round(correct/self.n, 2),
+        true_negative, total_negative, round(true_negative/total_negative, 2),
+        true_positive, total_positive, round(true_positive/total_positive, 2)))
 
 
 def usage():
@@ -89,11 +103,9 @@ def usage():
 if len(sys.argv) != 3: usage()
 train_file = sys.argv[1]
 test_file = sys.argv[2]
+kind = test_file[test_file.find('-')+1:test_file.find('.')]
 h = Heart(train_file, test_file)
 h.train()
 h.determine_likelihood()
 h.classify()
-h.verify()
-# print(h.F)
-# print(h.N)
-# print(h.L)
+h.verify(kind)
