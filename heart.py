@@ -7,56 +7,48 @@ import math
 class Heart(object):
 
     def __init__(self, train_file, test_file):
-        self.create_training(train_file)
-        self.create_test(test_file)
+        T = self.create_data(train_file)
+        C = self.create_data(test_file)
         self.F = [[]]
         self.N = []
         self.L = []
-
-    def create_training(self, train_file):
-        with open(train_file, "r") as f:
-            n = int(os.stat(train_file).st_size / 23 / 2)
-            T = [[0] * 23 for _ in range(n)]
-            for i,row in zip(range(n), f):
-                rows = row.strip().split(",")
-                for j,col in zip(range(23), rows):
-                    num = int(col)
-                    T[i][j] = num
         self.T = T
-
-    def create_test(self, test_file):
-        with open(test_file, "r") as f:
-            n = int(os.stat(test_file).st_size / 23 / 2)
-            C = [[0] * 23 for _ in range(n)]
-            for i,row in zip(range(n), f):
-                rows = row.strip().split(",")
-                for j,col in zip(range(23), rows):
-                    num = int(col)
-                    C[i][j] = num
         self.C = C
-        self.n = n
+
+    def create_data(self, data_file):
+        with open(data_file, "r") as f:
+            D = []
+            i = 0
+            for rows in f:
+                row = rows.strip().split(",")
+                num_cols = len(row)
+                for j in range(num_cols):
+                    row[j] = int(row[j])
+                D.append(row)
+                i += 1
+        self.n = i
+        self.features = num_cols - 1
+        return D
 
     def train(self):
-        self.F = [[0] * 22 for _ in range(2)]
+        self.F = [[0] * self.features for _ in range(2)]
         self.N = [0] * 2
         for t in self.T:
             tc = t[0]
             tf = t[1:len(t)]
             self.N[tc] += + 1
-            for j,f in zip(range(22), tf):
+            for j,f in zip(range(self.features), tf):
                 if tf[j] == 1:
                     self.F[tc][j] += 1
     
     def determine_likelihood(self):
         N = self.N
-        F = self.F
-        n = self.n
-        self.L = [[math.log10(N[i] + 0.5) - math.log10(N[0] + N[1] + 0.5)] * n for i in range(2)]
+        self.L = [[math.log10(N[i] + 0.5) - math.log10(N[0] + N[1] + 0.5)] * self.n for i in range(2)]
         for i in range(2):
-            for j,c in zip(range(n), self.C):
+            for j,c in zip(range(self.n), self.C):
                 cf = c[1:len(c)]
-                for k in range(22):
-                    s = F[i][k]
+                for k in range(self.features):
+                    s = self.F[i][k]
                     if cf[k] == 0:
                         s = N[i] - s
                     self.L[i][j] += math.log10(s + 0.5) - math.log10(N[i] + 0.5)
@@ -79,22 +71,21 @@ class Heart(object):
         total_negative = 0
         total_positive = 0
         for c,r in zip(self.C, self.R):
-            if c[0] == r:
-                if c[0] == 0:
-                    true_negative += 1
-                if c[0] == 1:
-                    true_positive += 1
-                correct += 1
             if c[0] == 0:
                 total_negative += 1
+                if c[0] == r:
+                    true_negative += 1
+                    correct += 1
             if c[0] == 1:
                 total_positive += 1
+                if c[0] == r:
+                    true_positive += 1
+                    correct += 1
 
         print("{} {}/{} ({}) {}/{} ({}) {}/{} ({})"
         .format(kind, correct, self.n, round(correct/self.n, 2),
         true_negative, total_negative, round(true_negative/total_negative, 2),
         true_positive, total_positive, round(true_positive/total_positive, 2)))
-
 
 def usage():
     print("usage: python3 heart.py training_file test_file")
