@@ -1,6 +1,6 @@
 #! /usr/bin/python3
 
-# Classify heart anomalies using Naive Bayesian Machine Learning.
+# Classify heart anomalies using Naïve Bayesian Machine Learning.
 # Code adapted from pseudocode in assignment writeup
 
 import sys
@@ -40,19 +40,23 @@ class Heart(object):
         self.F = [[0] * self.features for _ in range(2)]
         self.N = [0] * 2
         for t in self.T:
+            # Training instance class.
             tc = t[0]
+            # Training instance list of features.
             tf = t[1:len(t)]
             self.N[tc] += + 1
             for j,f in zip(range(self.features), tf):
                 if tf[j] == 1:
                     self.F[tc][j] += 1
     
-    # Determine how likely each test case is to be anomalus based on the features of that case
+    # Determine how likely each test instance is to be normal and anomalous based on the features of that instance.
     def determine_likelihood(self):
         N = self.N
+        # Initialize the likelihoods for each test instance.
         self.L = [[math.log10(N[i] + 0.5) - math.log10(N[0] + N[1] + 0.5)] * self.n for i in range(2)]
         for i in range(2):
             for j,c in zip(range(self.n), self.C):
+                # Test instance list of features.
                 cf = c[1:len(c)]
                 for k in range(self.features):
                     s = self.F[i][k]
@@ -60,7 +64,7 @@ class Heart(object):
                         s = N[i] - s
                     self.L[i][j] += math.log10(s + 0.5) - math.log10(N[i] + 0.5)
 
-    # Classify the test case as normal or anomalus and store the result
+    # Classify the test case as normal or anomalous and store the result.
     def classify(self):
         R = []
         list1 = self.L[0]
@@ -72,7 +76,7 @@ class Heart(object):
                 R.append(0)
         self.R = R
 
-    # Compare the result to the actual class of each test case
+    # Compare the result to the actual class of each test instance.
     def verify(self, kind):
         correct = 0
         true_negative = 0
@@ -91,6 +95,7 @@ class Heart(object):
                     true_positive += 1
                     correct += 1
 
+        # Display statistics.
         print("{} {}/{} ({}) {}/{} ({}) {}/{} ({})"
         .format(kind, correct, self.n, round(correct/self.n, 2),
         true_negative, total_negative, round(true_negative/total_negative, 2),
@@ -103,7 +108,10 @@ def usage():
 if len(sys.argv) != 3: usage()
 train_file = sys.argv[1]
 test_file = sys.argv[2]
+
+# Get the name of the data set used.
 kind = test_file[test_file.find('-')+1:test_file.find('.')]
+
 h = Heart(train_file, test_file)
 h.train()
 h.determine_likelihood()

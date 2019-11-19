@@ -1,0 +1,19 @@
+Jason Holm jholm@pdx.edu
+Heart Anomaly
+
+I implemented a Naïve Bayesian classifier based on the pseudocode given in the assignment. The learner
+looks at the training data and keeps a count of how many times any one feature appears positive in either
+the normal or anomalous class. Then after it learns what features are generally positive for a given class
+it computes the how likely a given test instance is normal and how likely it's anomalous. The classifier
+then picks the one with the higher probability of being correct. At the end the program checks the
+computed classifications against the true classes of the test instances and displays statistics of how
+many are correctly classified.
+
+Below are my results for each data set provided.
+
+orig 142/187 (0.76) 10/15 (0.67) 132/172 (0.77)
+itg 145/187 (0.78) 15/15 (1.0) 130/172 (0.76)
+resplit 78/90 (0.87) 17/19 (0.89) 61/71 (0.86)
+resplit-itg 63/90 (0.7) 17/19 (0.89) 46/71 (0.65)
+
+My testing was done on Windows Subsystem for Linux (WSL) under Ubuntu using a Intel i5-4460 CPU @ 3.20GHz.
